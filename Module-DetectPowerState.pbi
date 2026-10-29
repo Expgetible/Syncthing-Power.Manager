@@ -1,7 +1,6 @@
 ﻿; ============================================================================================
 ; Detect power states and execute (DPSE) - module
 ; PureBasic 6.40 - Windows 10+
-; © 2026 Peter Bergström - all rights reserved
 ; © 2026 Peter Bergström - Licensed under the MIT License
 ; ============================================================================================
 
@@ -1295,11 +1294,9 @@ Module DPSE
 EndModule
 
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 405
-; FirstLine = 331
 ; CursorPosition = 3
 ; Folding = H8----8--
-; Markers = 365
+; Markers = 364
 ; EnableXP
 ; DPIAware
 ; Compiler = PureBasic 6.40 - C Backend (Windows - x64)
