@@ -1,7 +1,7 @@
 ﻿; ============================================================================================
 ; Prefs module
 ; PureBasic 6.40 - Windows 10+
-; © 2026 Peter Bergström - all rights reserved
+; © 2026 Peter Bergström - Licensed under the MIT License
 ; ============================================================================================
 ; Features:
 ; • Maintains a very simple preferences file that only contains keys (no groups).
@@ -56,11 +56,12 @@ Module Prefs
     fullName = MakeFileName(programName, ".prefs")
     
     If FileSize(fullName) > -1
-      OpenPreferences(fullName)
+      If Not OpenPreferences(fullName)
+        ProcedureReturn "9-Can't open existing prefs file - " + fullName
+      EndIf
     Else
       If Not CreatePreferences(fullName)
         ProcedureReturn "6-Can't create prefs file - " + fullName
-        End
       EndIf
     EndIf
     
@@ -174,7 +175,7 @@ Module Prefs
   
 EndModule
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 35
+; CursorPosition = 3
 ; Folding = f-
 ; EnableXP
 ; DPIAware

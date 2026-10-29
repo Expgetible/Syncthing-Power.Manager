@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/34139297/README.md)
 # Syncthing Power Manager
 
 Tries to wake up a server to let Syncthing update both before and after the user works on the computer.

@@ -1,4 +1,11 @@
 ﻿CompilerIf #PB_Compiler_IsMainFile
+﻿; ==============================================================================
+; Module LookUp GUI
+; PureBasic 6.40 - Windows 10
+; © 2026 Peter Bergström - Licensed under the MIT License
+; ==============================================================================
+
+CompilerIf #PB_Compiler_IsMainFile
   
   IncludeFile "Module-NetworkTools.pbi"
   
@@ -174,6 +181,8 @@ CompilerEndIf
 ; CursorPosition = 25
 ; FirstLine = 21
 ; Folding = e-
+; CursorPosition = 1
+; Folding = f-
 ; EnableThread
 ; EnableXP
 ; DPIAware

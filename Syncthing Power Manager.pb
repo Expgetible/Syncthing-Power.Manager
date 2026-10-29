@@ -1,24 +1,25 @@
 ﻿; ==============================================================================
 ; Syncthing Monitor for the sys tray
 ; PureBasic 6.40 - Windows 10
-; © 2026 Peter Bergström - all rights reserved
+; © 2026 Peter Bergström - Licensed under the MIT License
 ; ==============================================================================
 ; 
 ; 2026-10-28: 
 ; Updated:      • The state machine is now updated with a more secure method running in the same loop as the events.
 ; Implemented:  • Log level is adjustable via preferences.
 ; 2026-10-26: V1.3
-; Implemented: A state machine instead of flags trying to keep track of what actions to do.
-; Implemented: The module DPSE is now in three parts: Logic, Windows signals and Timer events.
+; Implemented:  • A state machine instead of flags trying to keep track of what actions to do.
+; Implemented:  • The module DPSE is now in three parts: Logic, Windows signals and Timer events.
 ; 2026-10-17: v1.1
-; Fixed: Path fix. The log file was saved to the development folder. Now it goes to the same folder as the prefs file - local on each computer.
+; Fixed:        • Path fix. The log file was saved to the development folder. Now it goes to the same folder as the
+; Fixed:          prefs file - local on each computer.
 ; 2026-10-16: v1.0
 ; Updated: Bumping version to 1.0, the first release.
-; Fixed:    • When display and power down is set to the same time out, the computer never powers down.
-; Fixed:      (race condition) We get message: (PowerDown( From MainLoop power down timer ): Ignored -
-; Fixed:      Task haven't run yet.) Which is correct, but there must be a trigger to power down when
-; Fixed:      task has finished. (the logic is modified, remains to try it) - It seems to work now!
-; Fixed:      Not sure exactly what did it because a lot of fixes have been made.
+; Fixed:    • When display and power down is set to the same time out, the computer never powers down. (race
+; Fixed:      condition) We get message: (PowerDown( From MainLoop power down timer ): Ignored - Task haven't
+; Fixed:      run yet.) Which is correct, but there must be a trigger to power down when task has finished.
+; Fixed:      (the logic is modified, remains to try it) - It seems to work now! Not sure exactly what did it
+; Fixed:      because a lot of fixes have been made.
 ; 2026-10-06:
 ; Fixed:		• Since many things can happen at the same time, it's not sure that they happen in the correct
 ; Fixed:		  order, so some extra logic have been inserted to handle flags and their conditions.
@@ -26,9 +27,14 @@
 ; Updated:	• Task cool off time is now counted from when the message TaskDone arrives. (was in signaltask
 ; Updated:    procedure as a reminiscence before messages where used). This means task can't double run.
 ; 2026-10-16
-; Todo: • Add colour preferences for the status. Should edit purple-okay, blue-online, yellow-not synced, green-synced and red-no connection.
+; Todo: • Add a check of the server IP by verifying the prefs MAC and IP with the LookUp IP for the prefered MAC.
+; Todo:   This is to detect a new IP if the server is using DHCP.
+; Todo:   Also add a better fail safe if the lookup doesn't find the MAC.
+; Todo: • Add colour preferences for the status. Should edit purple-okay, blue-online, yellow=not synced, green=synced
+; Todo:   and red=no connection.
 ; Todo: • I've added blue colour. Make use of this when the IP answers the ping, meaning the server is online.
-; Todo: • Add 'Override power settings', to temorarily change the timings or even turn power save off. The low level modules already support it.
+; Todo: • Add 'Override power settings', to temorarily change the timings or even turn power save off. The low level
+; Todo:   parts in DPSE already support it.
 
 EnableExplicit
 
@@ -115,7 +121,7 @@ Define   keepActive.b
 
 prefsResult$ = Prefs::Get(#programName)
 If prefsResult$ <> #Null$
-  Debug prefsResult$
+  MessageRequester("Syncthing Power Manager", prefsResult$)
   End
 EndIf
 
@@ -237,7 +243,7 @@ Procedure   t_TryCompleteSync(*param)
   
   CompilerIf #debug_NoRunTask
     Delay(4000)
-    Goto FinnishTask
+    Goto FinishTask
   CompilerEndIf
   
   Debug "Trying to wake up server."
@@ -250,7 +256,7 @@ Procedure   t_TryCompleteSync(*param)
   Wend
   If gStatus$ = #stStatus_notConnected
     Debug "No contact with server, giving up"
-    Goto FinnishTask
+    Goto FinishTask
   EndIf
   Debug "Server is awake."
   
@@ -264,7 +270,7 @@ Procedure   t_TryCompleteSync(*param)
   Until gStatus$ = #stStatus_UpToDate Or gStatus$ = #stStatus_notConnected Or gQuit = #True
   Debug "Stopped waiting for sync"
   
-  FinnishTask:
+  FinishTask:
   PostEvent(DPSE::#Event_extTaskDone, 0, 0)
   tryCompleteSyncRunning = #False
   
@@ -608,8 +614,10 @@ Procedure.b PrefsWinEvents(thisEvent.i)
       DisableGadget(btn_nwLookUp, #True)
       lookUpDisabled = #True
       LookUpGUI::Collect(lookUp)
-      SetGadgetText(str_nwServerIP , lookUp\chosenIP)
-      SetGadgetText(str_nwServerMAC, lookUp\chosenMAC)
+      If lookUp\chosenMAC <> #Null$
+        SetGadgetText(str_nwServerIP , lookUp\chosenIP)
+        SetGadgetText(str_nwServerMAC, lookUp\chosenMAC)
+      EndIf
       
     Case btn_Cancel
       
@@ -666,8 +674,7 @@ Procedure.b PrefsWinEvents(thisEvent.i)
 EndProcedure
 
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 513
-; FirstLine = 422
+; CursorPosition = 37
 ; Folding = -4H-
 ; Optimizer
 ; EnableThread

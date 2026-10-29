@@ -1,7 +1,7 @@
 ﻿; ==============================================================================
 ; Module Network Tools
 ; PureBasic 6.40 - Windows 10
-; © 2026 Peter Bergström - all rights reserved
+; © 2026 Peter Bergström - Licensed under the MIT License
 ; ==============================================================================
 
 ; ScanNet() will take a while (20 seconds or more). But it can be started threaded if you need the time for other stuff.
@@ -430,7 +430,7 @@ CompilerIf #PB_Compiler_IsMainFile
 CompilerEndIf
 
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 244
+; CursorPosition = 3
 ; Folding = ----
 ; EnableThread
 ; EnableXP

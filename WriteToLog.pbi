@@ -1,7 +1,7 @@
 ﻿; ==============================================================================
 ; Procedure Write to log
 ; PureBasic 6.40 - Windows 10+
-; © 2026 Peter Bergström - all rights reserved
+; © 2026 Peter Bergström - Licensed under the MIT License
 ; ==============================================================================
 ;< Features:
 ; • Time stamp with date.
@@ -184,8 +184,7 @@ EndProcedure
 
 
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 175
-; FirstLine = 34
+; CursorPosition = 3
 ; Folding = d-
 ; EnableXP
 ; DPIAware

@@ -7,35 +7,35 @@
   <section name="data">
     <explorer view="" pattern="0"/>
     <log show="1"/>
-    <lastopen date="2026-10-29 12:46" user="mails" host="C4-2"/>
+    <lastopen date="2026-10-29 15:39" user="mails" host="C4-2"/>
   </section>
   <section name="files">
     <file name="Syncthing Power Manager.pb">
       <config load="1" scan="1" panel="1" warn="1" lastopen="1" sortindex="1" panelstate="+"/>
-      <fingerprint md5="dbbfec9082470fccd4f0ae66ff3bfad2"/>
-    </file>
-    <file name="WriteToLog.pbi">
-      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="3" panelstate="+"/>
-      <fingerprint md5="121bfa494bd0dbbd50129ce4e3fcc848"/>
+      <fingerprint md5="407344156d74ff9009c3f116fd8b0ad6"/>
     </file>
     <file name="Module-DetectPowerState.pbi">
       <config load="1" scan="1" panel="1" warn="1" lastopen="1" sortindex="2" panelstate="+"/>
       <fingerprint md5="79e174125d4910687371c07f2d7984ee"/>
     </file>
+    <file name="WriteToLog.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="3" panelstate="+"/>
+      <fingerprint md5="121bfa494bd0dbbd50129ce4e3fcc848"/>
+    </file>
     <file name="Module-Prefs.pbi">
       <config load="1" scan="1" panel="1" warn="1" lastopen="1" sortindex="4" panelstate="+"/>
-      <fingerprint md5="9b3e0a946f265f1a51de687f3c551cc2"/>
+      <fingerprint md5="6283db6a621103761c44db4d261261d6"/>
     </file>
     <file name="Form-SyncthingPrefs.pbf">
       <config load="1" scan="1" panel="1" warn="1" lastopen="0" sortindex="999" panelstate="+"/>
       <fingerprint md5="86292e9e855f62a44221fc8e579bb5fc"/>
     </file>
     <file name="Module-NetworkTools.pbi">
-      <config load="1" scan="1" panel="1" warn="1" lastopen="0" sortindex="999" panelstate="+"/>
+      <config load="1" scan="1" panel="1" warn="1" lastopen="1" sortindex="5" panelstate="+"/>
       <fingerprint md5="97a4ff0ced993b527801c00dde7ee30b"/>
     </file>
     <file name="Module-LookUpGUI.pbi">
-      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="999" panelstate="+"/>
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="6" panelstate="+"/>
       <fingerprint md5="e94d30d8bda0f4e3816a293bb9822ece"/>
     </file>
     <file name="Form-SyncthingLookUp.pbf">
@@ -63,7 +63,7 @@
         <field6 value="Manages power off and sync to server"/>
         <field7 value="Syncthing Power Manager"/>
         <field8 value="%EXECUTABLE"/>
-        <field9 value="Copyright © Peter Bergström (20026-%YYYY)"/>
+        <field9 value="Copyright © Peter Bergström (2026-%YYYY)"/>
       </versioninfo>
     </target>
   </section>

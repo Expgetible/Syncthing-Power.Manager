@@ -1,0 +1,14 @@
+# PureBasic temporära filer och backuper
+*.bp~
+*.atp
+*.bak
+
+# Kompilerade program (om du kompilerar till samma mapp)
+*.exe
+*.dll
+*.so
+*.dylib
+*.app/
+
+# PureBasic interna kompileringsmappar
+PureBasic_Compilation_*
