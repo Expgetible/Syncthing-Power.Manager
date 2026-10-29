@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://www.purebasic.com/namespace" version="1.0" creator="PureBasic 6.40 (Windows - x64)">
+  <section name="config">
+    <options closefiles="1" openmode="0" name="Syncthing Monitor"/>
+  </section>
+  <section name="data">
+    <explorer view="" pattern="0"/>
+    <log show="1"/>
+    <lastopen date="2026-10-29 12:46" user="mails" host="C4-2"/>
+  </section>
+  <section name="files">
+    <file name="Syncthing Power Manager.pb">
+      <config load="1" scan="1" panel="1" warn="1" lastopen="1" sortindex="1" panelstate="+"/>
+      <fingerprint md5="dbbfec9082470fccd4f0ae66ff3bfad2"/>
+    </file>
+    <file name="WriteToLog.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" sortindex="3" panelstate="+"/>
+      <fingerprint md5="121bfa494bd0dbbd50129ce4e3fcc848"/>
+    </file>
+    <file name="Module-DetectPowerState.pbi">
+      <config load="1" scan="1" panel="1" warn="1" lastopen="1" sortindex="2" panelstate="+"/>
+      <fingerprint md5="79e174125d4910687371c07f2d7984ee"/>
+    </file>
+    <file name="Module-Prefs.pbi">
+      <config load="1" scan="1" panel="1" warn="1" lastopen="1" sortindex="4" panelstate="+"/>
+      <fingerprint md5="9b3e0a946f265f1a51de687f3c551cc2"/>
+    </file>
+    <file name="Form-SyncthingPrefs.pbf">
+      <config load="1" scan="1" panel="1" warn="1" lastopen="0" sortindex="999" panelstate="+"/>
+      <fingerprint md5="86292e9e855f62a44221fc8e579bb5fc"/>
+    </file>
+    <file name="Module-NetworkTools.pbi">
+      <config load="1" scan="1" panel="1" warn="1" lastopen="0" sortindex="999" panelstate="+"/>
+      <fingerprint md5="97a4ff0ced993b527801c00dde7ee30b"/>
+    </file>
+    <file name="Module-LookUpGUI.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="999" panelstate="+"/>
+      <fingerprint md5="e94d30d8bda0f4e3816a293bb9822ece"/>
+    </file>
+    <file name="Form-SyncthingLookUp.pbf">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="0" sortindex="999" panelstate="+"/>
+      <fingerprint md5="fcf6186ccea7e9bea468334331ce2da5"/>
+    </file>
+  </section>
+  <section name="targets">
+    <target name="Default Target" enabled="1" default="1">
+      <inputfile value="Syncthing Power Manager.pb"/>
+      <outputfile value="SyncthingPowerManager.exe"/>
+      <compiler version="PureBasic 6.40 - C Backend (Windows - x64)"/>
+      <executable value="SyncthingPowerManager.exe"/>
+      <options thread="1" xpskin="1" dpiaware="1" debug="1" optimizer="1"/>
+      <temporaryexe value="source"/>
+      <compilecount enable="1" value="59"/>
+      <buildcount enable="1" value="2"/>
+      <versioninfo enable="1">
+        <field0 value="%BUILDCOUNT, %COMPILECOUNT,0,0"/>
+        <field1 value="%BUILDCOUNT, %COMPILECOUNT"/>
+        <field2 value="pTb Coding"/>
+        <field3 value="Syncthing Power Manager"/>
+        <field4 value="%BUILDCOUNT, %COMPILECOUNT"/>
+        <field5 value="%BUILDCOUNT, %COMPILECOUNT"/>
+        <field6 value="Manages power off and sync to server"/>
+        <field7 value="Syncthing Power Manager"/>
+        <field8 value="%EXECUTABLE"/>
+        <field9 value="Copyright © Peter Bergström (20026-%YYYY)"/>
+      </versioninfo>
+    </target>
+  </section>
+</project>

@@ -1,0 +1,18 @@
+Här är ett kompakt och tekniskt sammandrag som du kan kopiera och klistra in i en helt ny chatt i framtiden. Det ger mig (eller en annan AI-session) all kontext som behövs för att fortsätta exakt där vi slutade.
+
+📝 Projekt-sammandrag: Syncthing Power Manager (PureBasic 6.40)
+
+1. Bakgrund & Arkitektur
+• Syfte: Ett program i sys tray som känner av Windows energisparlägen och utför nätverkssynkronisering (via Syncthing REST API) innan datorn tillåts somna.
+• Plattform: PureBasic 6.40 (C-backend, trådsäker kompiling), Windows 10/11.
+• Struktur (v1.3): Programmet styrs av en deterministisk tillståndsmaskin (PLC-logik med statiska, latchade ingångar). Alla systemnära åtgärder (DisplayOn, DisplayOff, PowerDown via SetComputerSuspendState) körs sekventiellt på huvudtråden inuti fönsterloopens WaitWindowEvent(50)-pass. Detta eliminerade tidigare trådkapplöpningar (Race Conditions) där Windows nekade viloläget.
+2. Driftsäkerhet & Felhantering
+• Felsäker PowerDown: Proceduren PowerDown() returnerar en boolean och har en tröskel på < 2000 ms för att detektera om Windows tyst nekar sömnhändelsen.
+• Symmetrisk återgång: Tillståndsmaskinen hanterar tre olika avstängningsvägar (Power-knapp, omedelbar synk-klar, samt timout efter skärmsläckare). Om PowerDown() misslyckas, backar maskinen till tillståndet #State_ScreenIsOn, väcker skärmen och återstartar timrarna för att förhindra dödlägen.
+3. Lärdomar om Windows-kärnan vs AmigaOS
+• Loop-hopp: Öppna loopar utan Delay() visar trådplanerarens tidskvantum (Context Switches) på ~10–15 ms, vilket är dyrare i Windows p.g.a. MMU-minnesskydd än i AmigaOS.
+• Delay-precision: Delay(1) tar ~2 ms p.g.a. Windows klockupplösning och Dynamic Ticks. Att lura systemet med Delay(9) för 10 ms är den mest pragmatiska lösningen, då även WaitableTimers påverkas av Timer Coalescing och strömspar-latens (C-state wakeup) på ~1 ms i Windows 11.
+4. Nästa planerade steg
+• Utveckla en Windows-tjänst (Windows Service) i PureBasic som ligger i bakgrunden (LocalSystem i Session 0).
+• Tjänsten ska övervaka en sökväg efter nya versioner av SyncthingPowerManager.exe, stänga monitorn via #WM_CLOSE, ersätta filen, och sedan starta om den i den aktiva användarens skrivbordssession via CreateProcessAsUser_ (för att hantera Session 0 Isolation).
+Spara den här texten i en lokal fil. När du är redo att fortsätta med uppdateringstjänsten eller något annat, klistra bara in texten och berätta vilken del av tjänste-logiken du vill börja skriva källkod för!
