@@ -31,6 +31,7 @@ DeclareModule DPSE
   Declare   StateMachine()
   Declare   SM_TriggerInputEvent(inputEvent.l)
   
+  ; Please note that order is critical. If changed, modify sm_InputNames() accordingly.
   Enumeration inputs
     #In_DisplayActivated
     #In_DisplayDeactivated
@@ -49,6 +50,7 @@ DeclareModule DPSE
     #In_TimeOutDisplay      ; 14
     #In_TimeOutStandby
     #In_TimeOutTaskCoolOff
+    #In_FalseInput
     #InputLastIndex
   EndEnumeration
 
@@ -130,6 +132,9 @@ DeclareModule DPSE
     #Event_System_powerDown
     #Event_UserLogOff
     #Event_SystemShutDown
+    CompilerIf #PB_Compiler_Debugger
+      #Event_EmergencyQuit
+    CompilerEndIf
   
     ; These are external events that can be posted from or to this module for different behaviours.
     #Event_extRunTask             ; signal to the main program to run its task.
@@ -154,9 +159,9 @@ Module DPSE
   ; Abstraction Definitions for Logic 
   
   Enumeration states
-    #State_ScreenIsOn
-    #State_ScreenRunningTask
-    #State_ScreenIsOff
+    #State_DisplayIsOn
+    #State_DisplayRunningTask
+    #State_DisplayIsOff
     #State_PowerRunningTask
     #State_PoweringDown
     #State_Resuming
@@ -184,6 +189,7 @@ Module DPSE
   sm_InputNames(14) = "#In_TimeOutDisplay"
   sm_InputNames(15) = "#In_TimeOutStandby"
   sm_InputNames(16) = "#In_TimeOutTaskCoolOff"
+  sm_InputNames(17) = "#In_FalseInput"
 
   ; Abstraction Definitions for Windows signals 
   
@@ -267,20 +273,11 @@ Module DPSE
     
   EndProcedure
   
-  Procedure.b SM_CheckInput(inputEvent.l)
-    
-    If sm_Inputs(inputEvent)
-      sm_Sum - 1
-      ProcedureReturn #True
-    EndIf
-    
-  EndProcedure
-  
   Procedure   StateMachine()
     
     Protected i.l, lastSum.l
     
-    sm_Sum = 0 : lastSum = 0
+    sm_Sum = 0
     For i = 0 To #InputLastIndex - 1
       sm_Sum + sm_Inputs(i)
     Next
@@ -289,106 +286,128 @@ Module DPSE
     Repeat
       lastSum = sm_Sum
       
+      CompilerIf #PB_Compiler_Debugger
+        If sm_Inputs(#In_PowerButton)
+          If MessageRequester("Syncthing debug:", "Is this an emergency exit?", #PB_MessageRequester_YesNo) = #PB_MessageRequester_Yes
+            PostEvent(#Event_EmergencyQuit)
+          EndIf
+        EndIf
+      CompilerEndIf
+      
       Select currentState
-          
-        Case #State_ScreenIsOn
-          If SM_CheckInput(#In_TimeOutDisplay)
-            WriteToLog("#State_ScreenIsOn - #In_TimeOutDisplay -> #State_ScreenRunningTask", #Log_Info)
-            SignalTaskToExecute("#State_ScreenIsOn")
-            currentState = #State_ScreenRunningTask
+            
+        Case #State_DisplayIsOn
+          If sm_Inputs(#In_TimeOutDisplay)
+            WriteToLog("#State_DisplayIsOn - #In_TimeOutDisplay -> #State_DisplayRunningTask", #Log_Info)
+            SignalTaskToExecute("#State_DisplayIsOn")
+            currentState = #State_DisplayRunningTask
             sm_Inputs(#In_TimeOutDisplay) = #False
+            sm_Sum - 1
           EndIf
           
-          If SM_CheckInput(#In_PowerButton)
-            WriteToLog("#State_ScreenIsOn - #In_PowerButton -> #State_PowerRunningTask", #Log_Info)
+          If sm_Inputs(#In_PowerButton)
+            WriteToLog("#State_DisplayIsOn - #In_PowerButton -> #State_PowerRunningTask", #Log_Info)
             DisplayOn("#In_PowerButton")
             SignalTaskToExecute("#In_PowerButton")
             currentState = #State_PowerRunningTask
             sm_Inputs(#In_PowerButton) = #False
+            sm_Sum - 1
           EndIf
           
-        Case #State_ScreenRunningTask
-          If SM_CheckInput(#In_extTaskDone)
+        Case #State_DisplayRunningTask
+          If sm_Inputs(#In_extTaskDone)
         
-            If SM_CheckInput(#In_TimeOutStandby)
+            If sm_Inputs(#In_TimeOutStandby)
               sm_Inputs(#In_extTaskDone) = #False
               sm_Inputs(#In_TimeOutStandby) = #False
+              sm_Sum - 2
               
               If PowerDown("")
-                WriteToLog("#State_ScreenRunningTask - #In_extTaskDone -> #State_PoweringDown", #Log_Info)
+                WriteToLog("#State_DisplayRunningTask - #In_extTaskDone -> #State_PoweringDown", #Log_Info)
                 currentState = #State_PoweringDown
               Else
-                WriteToLog("FAILED PowerDown -> #State_ScreenRunningTask - #In_extTaskDone -> #State_ScreenIsOn", #Log_Info)
-                DisplayOn("#State_ScreenRunningTask")
-                JogMouse("#State_ScreenRunningTask")
-                currentState = #State_ScreenIsOn
+                WriteToLog("FAILED PowerDown -> #State_DisplayRunningTask - #In_extTaskDone -> #State_DisplayIsOn", #Log_Info)
+                DisplayOn("#State_DisplayRunningTask")
+                currentState = #State_DisplayIsOn
               EndIf
             Else
-              WriteToLog("#State_ScreenRunningTask - #In_extTaskDone -> #State_ScreenIsOff", #Log_Info)
-              DisplayOff("#State_ScreenRunningTask")
-              currentState = #State_ScreenIsOff
+              WriteToLog("#State_DisplayRunningTask - #In_extTaskDone -> #State_DisplayIsOff", #Log_Info)
+              DisplayOff("#State_DisplayRunningTask")
+              currentState = #State_DisplayIsOff
               sm_Inputs(#In_extTaskDone) = #False
+              sm_Sum - 1
             EndIf
           EndIf
           
-        Case #State_ScreenIsOff
-          If SM_CheckInput(#In_InputHook)
-            WriteToLog("#State_ScreenIsOff - #In_InputHook -> #State_ScreenIsOn", #Log_Info)
-            _stopInputDetection("#State_ScreenIsOff")
-            DisplayOn("#State_ScreenIsOff")
-            currentState = #State_ScreenIsOn
+        Case #State_DisplayIsOff
+          If sm_Inputs(#In_InputHook)
+            WriteToLog("#State_DisplayIsOff - #In_InputHook -> #State_DisplayIsOn", #Log_Info)
+            _stopInputDetection("#State_DisplayIsOff")
+            DisplayOn("#State_DisplayIsOff")
+            currentState = #State_DisplayIsOn
             sm_Inputs(#In_InputHook) = #False
+            sm_Sum - 1
             
-          ElseIf SM_CheckInput(#In_DisplayActivated)
-            WriteToLog("#State_ScreenIsOff - #In_DisplayActivated <-", #Log_Info)
-            DisplayOff("#State_ScreenIsOff")
-            sm_Inputs(#In_DisplayActivated) = #False
+          ElseIf sm_Inputs(#In_DisplayActivated)
+              WriteToLog("#State_DisplayIsOff - #In_DisplayActivated <-", #Log_Info)
+              DisplayOff("#State_DisplayIsOff")
+              sm_Inputs(#In_FalseInput) = #False
+              sm_Inputs(#In_DisplayActivated) = #False
+              sm_Sum - 2
           EndIf
           
-          If SM_CheckInput(#In_TimeOutStandby)
+          If sm_Inputs(#In_TimeOutStandby)
             sm_Inputs(#In_TimeOutStandby) = #False
+            sm_Sum - 1
             
-            If PowerDown("#State_ScreenIsOff")
-              WriteToLog("#State_ScreenIsOff - #In_TimeOutStandby -> #State_PoweringDown", #Log_Info)
+            If PowerDown("#State_DisplayIsOff")
+              WriteToLog("#State_DisplayIsOff - #In_TimeOutStandby -> #State_PoweringDown", #Log_Info)
               currentState = #State_PoweringDown
             Else
-              WriteToLog("FAILED PowerDown -> #State_ScreenIsOff - #In_TimeOutStandby -> #State_ScreenIsOn", #Log_Info)
-              DisplayOn("#State_ScreenIsOff")
-              JogMouse("#State_ScreenIsOff")
-              currentState = #State_ScreenIsOn
+              WriteToLog("FAILED PowerDown -> #State_DisplayIsOff - #In_TimeOutStandby -> #State_DisplayIsOn", #Log_Info)
+              DisplayOn("#State_DisplayIsOff")
+              currentState = #State_DisplayIsOn
             EndIf
           EndIf
           
         Case #State_PowerRunningTask
-          If SM_CheckInput(#In_extTaskDone)
+          If sm_Inputs(#In_extTaskDone)
             sm_Inputs(#In_extTaskDone) = #False
+            sm_Sum - 1
             If PowerDown("#State_PowerRunningTask")
               WriteToLog("#State_PowerRunningTask - #In_extTaskDone -> #State_PoweringDown", #Log_Info)
               currentState = #State_PoweringDown
             Else
-              WriteToLog("FAILED PowerDown -> #State_PowerRunningTask - #In_extTaskDone -> #State_ScreenIsOn", #Log_Info)
+              WriteToLog("FAILED PowerDown -> #State_PowerRunningTask - #In_extTaskDone -> #State_DisplayIsOn", #Log_Info)
               DisplayOn("#State_PowerRunningTask")
-              JogMouse("#State_PowerRunningTask")
-              currentState = #State_ScreenIsOn
+              currentState = #State_DisplayIsOn
             EndIf
           EndIf
           
         Case #State_PoweringDown
-          If SM_CheckInput(#In_SystemResume)
+          If sm_Inputs(#In_SystemResume)
             WriteToLog("#State_PoweringDown - #In_SystemResume -> #State_Resuming", #Log_Info)
             SignalTaskToExecute("#State_PoweringDown")
             currentState = #State_Resuming
             sm_Inputs(#In_SystemResume) = #False
+            sm_Sum - 1
           EndIf
           
         Case #State_Resuming
-          If SM_CheckInput(#In_extTaskDone)
-            WriteToLog("#State_Resuming - #In_extTaskDone -> #State_ScreenIsOn", #Log_Info)
-            currentState = #State_ScreenIsOn
+          If sm_Inputs(#In_extTaskDone)
+            WriteToLog("#State_Resuming - #In_extTaskDone -> #State_DisplayIsOn", #Log_Info)
+            currentState = #State_DisplayIsOn
             sm_Inputs(#In_extTaskDone) = #False
+            sm_Sum - 1
           EndIf
           
       EndSelect
+      
+      If sm_Sum < 1
+        WriteToLog("Negative sm_Sum indicates an error subtracting.", #Log_Error, "StateMachine()")
+        End
+      EndIf
+      
     Until lastSum = sm_Sum
     
   EndProcedure
@@ -799,6 +818,8 @@ Module DPSE
       WriteToLog("_stopInputDetection() Already stopped.", #Log_Detail, caller)
     EndIf
     
+    hInstance = 0
+    
   EndProcedure
   
   Procedure.b SetComputerSuspendState(useHibernate.b = #False, force.b = #True, disableWake.b = #False)
@@ -845,6 +866,8 @@ Module DPSE
     SendMessage_(#HWND_BROADCAST, #WM_SYSCOMMAND, #SC_MONITORPOWER, #MONITOR_ON)
     Delay(50)
     JogMouse("DisplayOn")
+    StartDisplayOffTimer("MainLoop E1")
+    StartPowerOffTimer("MainLoop E1")
     
   EndProcedure
   
@@ -905,9 +928,10 @@ Module DPSE
     EndIf
     
     If EventType() = #EventType_MouseFiltered 
-      If ElapsedMilliseconds() - eventFloodFilter > #floodBorder
+      SM_TriggerInputEvent(#In_FalseInput)
+;       If ElapsedMilliseconds() - eventFloodFilter > #floodBorder
         WriteToLog("HookEventHandler() - Mouse move " + Str(EventData()) + " pixels filtered.", #Log_Detail)
-      EndIf
+;       EndIf
     Else
       SM_TriggerInputEvent(#In_InputHook)
       WriteToLog("HookEventHandler() - Real input. Lighting up display.", #Log_Detail)
@@ -994,28 +1018,24 @@ Module DPSE
         Select EventTimer()
           Case 1 ; Display time out
             If ValidateDisplayTimeout()
-              NoDisplayOffTimer("MainLoop timer")
+              NoDisplayOffTimer("TimerEventHandler() - display time out")
               SM_TriggerInputEvent(#In_TimeOutDisplay)
             Else
-              StartDisplayOffTimer("MainLoop timer")
+              StartDisplayOffTimer("TimerEventHandler() - display time reset")
             EndIf
             
           Case 2 ; Standby time out
             If ValidatePowerTimeout()
-              NoPowerOffTimer("MainLoop timer")
+              NoPowerOffTimer("TimerEventHandler() - power time out")
               SM_TriggerInputEvent(#In_TimeOutStandby)
             Else
-              StartPowerOffTimer("MainLoop timer")
+              StartPowerOffTimer("TimerEventHandler() - power time reset")
             EndIf
             
           Case 3 ; Permit task to run again
             RemoveWindowTimer(0, 3)
             SM_TriggerInputEvent(#In_TimeOutTaskCoolOff)
         EndSelect
-        
-      Case #Event_PowerButton
-;         NoDisplayOffTimer("MainLoop PB")
-;         NoPowerOffTimer("MainLoop PB")
         
       Case #Event_DisplayTimeChanged
         GetModernPowerSettings(@currentPowerSettings)
@@ -1040,10 +1060,6 @@ Module DPSE
       Case #Event_PowerPolicyChanged
         WriteToLog("SCHEDULE Event: Power policy changed - HOW?", #Log_Detail)
           
-      Case #Event_DisplayActivated
-        StartDisplayOffTimer("MainLoop E1")
-        StartPowerOffTimer("MainLoop E1")
-        
       Case #Event_SystemResume
         StartDisplayOffTimer("MainLoop Resume")
         StartPowerOffTimer("MainLoop Resume")
@@ -1113,23 +1129,23 @@ Module DPSE
     ; Tries to power down in order Standby, Hibernation. If none exists, nothing happens except for a message in the log.
     _powerDownTicks = ElapsedMilliseconds()
     If currentPowerSettings\supportedPwrOffModes & #pwrOffSleep
-      Debug "Trying to sleep"
+      WriteToLog("Trying to sleep", #Log_Detail, "PowerDown()")
       result = SetComputerSuspendState()
     ElseIf currentPowerSettings\supportedPwrOffModes & #pwrOffHibernate
-      Debug "Trying to hibernate"
+      WriteToLog("Trying to hibernate", #Log_Detail, "PowerDown()")
       result = SetComputerSuspendState(#True)
     ElseIf currentPowerSettings\supportedPwrOffModes & #pwrOffShutdown
-      WriteToLog("(PowerDown(): Ignored - No support for shut down right now. Will not power down.", #Log_Warning, caller)
+      WriteToLog("PowerDown(): Ignored - No support for shut down right now. Will not power down.", #Log_Warning, caller)
     Else
-      WriteToLog("(PowerDown(): Ignored - Can't find power down method. Will not power down.", #Log_Warning, caller)
+      WriteToLog("PowerDown(): Ignored - Can't find power down method. Will not power down.", #Log_Warning, caller)
     EndIf
     ; Did the function for power down fail?
     If Not result
-      WriteToLog("(PowerDown(): Power down Failed by reason unknown!)", #Log_Warning, caller)
+      WriteToLog("PowerDown(): Power down Failed by reason unknown!", #Log_Warning, caller)
     Else
       ; Was it a real power down?
       If ElapsedMilliseconds() - _powerDownTicks < 2000
-        WriteToLog("(PowerDown(): An attempt was made to power down, but it failed.)", #Log_Warning, caller)
+        WriteToLog("PowerDown(): An attempt was made to power down, but it failed.", #Log_Warning, caller)
         ProcedureReturn #False
       EndIf
     EndIf
@@ -1294,9 +1310,10 @@ Module DPSE
 EndModule
 
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 3
-; Folding = H8----8--
-; Markers = 364
+; CursorPosition = 33
+; FirstLine = 6
+; Folding = P4----4---
+; Markers = 351,375,932,934
 ; EnableXP
 ; DPIAware
 ; Compiler = PureBasic 6.40 - C Backend (Windows - x64)

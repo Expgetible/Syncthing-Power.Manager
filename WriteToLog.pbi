@@ -154,15 +154,15 @@ EndProcedure
 
 Procedure GetTime()
   
-  Protected seconds.q, fractionScaled.q
-  Protected datePart$, fractionPart$
   
   ; Get current time and date down to 1/myTimer\frequency second
   QueryPerformanceCounter_(@myTimer\counter)
-  seconds = myTimer\counter / myTimer\frequency
-  myTimer\currentDate = myTimer\dateGap + seconds
-  myTimer\currentTicks = myTimer\counter - (seconds * myTimer\frequency)
-  fractionScaled = (myTimer\currentTicks * #TargetPrecision) / myTimer\frequency
+  ; Round off to seconds
+  myTimer\currentDate = myTimer\dateGap + Int(myTimer\counter / myTimer\frequency)
+  ; Save fraction of second
+  myTimer\currentTicks = myTimer\counter - Int(myTimer\counter / myTimer\frequency) * myTimer\frequency
+  ; Round off fraction to desired precision
+  myTimer\currentTicks * #TargetPrecision / myTimer\frequency
   
   ; Get the time difference since last called GetTime (in 1/myTimer\frequency s)
   myTimer\ticksDiff = myTimer\currentDate - myTimer\lastDate
@@ -172,7 +172,7 @@ Procedure GetTime()
   ; Format the date strings
   myTimer\dateFormated = FormatDate(#log_DateFormat, myTimer\currentDate) +
                          "." +
-                         RSet(Str(fractionScaled), Len(Str(#TargetPrecision)) - 1, "0") +
+                         RSet(Str(myTimer\currentTicks), Len(Str(#TargetPrecision)) - 1, "0") +
                          "] "
   myTimer\diffFormated = "[+" + RSet(Str(myTimer\ticksDiff), Len(Str(#TargetPrecision)) - 1, "0") + " µs] "
   
@@ -184,8 +184,8 @@ EndProcedure
 
 
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 3
-; Folding = d-
+; CursorPosition = 153
+; Folding = 0-
 ; EnableXP
 ; DPIAware
 ; Compiler = PureBasic 6.40 - C Backend (Windows - x64)

@@ -4,6 +4,19 @@
 ; © 2026 Peter Bergström - Licensed under the MIT License
 ; ==============================================================================
 ; 
+; A short note on the versioning method of this program:
+; v1.58 tells you that it is build version 1 and that it has been compiled 58 times.
+;   Check out %BUILDCOUNT and %COMPILECOUNT in the compiler options.
+
+; 2026-10-31:
+; Fixed:        Addressed the issue with the endless loop of lighting up and turning off the display:
+; Fixed:        • the sum keeping track of processed inputs wasn't updated correctly, resulting in faulty results.
+; Fixed:        • A dumb action on #Event_DisplayOn started the timers although it was a fake/glitch. Moved to
+; Fixed:          DisplayOn() instead (which is called by the logic of the state machine.
+; Updated:      • Procedure SM_CheckInput() is removed. Acting directly on the inputs now.
+; Updated:      • Calls to JogMouse() in the state machine are removed since DisplayOn already does this.
+; Updated:      • An extra error check is made on sm_Sum. If it gets negative the program stops.
+; Implemented:  • When in debug mode using the computers power button, the user will be asked to quit or do a power down.
 ; 2026-10-28: 
 ; Updated:      • The state machine is now updated with a more secure method running in the same loop as the events.
 ; Implemented:  • Log level is adjustable via preferences.
@@ -26,7 +39,10 @@
 ; 2026-10-05:
 ; Updated:	• Task cool off time is now counted from when the message TaskDone arrives. (was in signaltask
 ; Updated:    procedure as a reminiscence before messages where used). This means task can't double run.
-; 2026-10-16
+
+; Todo: • Make the update aware of two things:
+; Todo:   1. There are no files to update, so don't start up the server or try to do a sync.
+; Todo:   2. If there are no files to update, let the icon be green (even though we don't know what awaits downstream).
 ; Todo: • Add a check of the server IP by verifying the prefs MAC and IP with the LookUp IP for the prefered MAC.
 ; Todo:   This is to detect a new IP if the server is using DHCP.
 ; Todo:   Also add a better fail safe if the lookup doesn't find the MAC.
@@ -35,6 +51,8 @@
 ; Todo: • I've added blue colour. Make use of this when the IP answers the ping, meaning the server is online.
 ; Todo: • Add 'Override power settings', to temorarily change the timings or even turn power save off. The low level
 ; Todo:   parts in DPSE already support it.
+; Todo: • Consider moving the timer logic to the state machine instead, and just let TimerEventHandler report events
+; Todo:   back to the state machine. Or maybe even use a totally other timer system inside the state machine.
 
 EnableExplicit
 
@@ -211,6 +229,12 @@ Procedure   EventHandler()
       EndIf
     EndIf
     
+    CompilerIf #PB_Compiler_Debugger
+      If thisEvent = DPSE::#Event_EmergencyQuit
+        gQuit = #True
+      EndIf
+    CompilerEndIf
+      
     If thisEvent = #PB_Event_Menu
       If EventMenu() = #Menu_Exit
         gQuit = #True
@@ -674,8 +698,8 @@ Procedure.b PrefsWinEvents(thisEvent.i)
 EndProcedure
 
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 37
-; Folding = -4H-
+; CursorPosition = 9
+; Folding = --P+
 ; Optimizer
 ; EnableThread
 ; EnableXP

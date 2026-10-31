@@ -1,4 +1,3 @@
-﻿CompilerIf #PB_Compiler_IsMainFile
 ﻿; ==============================================================================
 ; Module LookUp GUI
 ; PureBasic 6.40 - Windows 10
@@ -178,11 +177,7 @@ CompilerIf #PB_Compiler_IsMainFile
 CompilerEndIf
 
 ; IDE Options = PureBasic 6.40 (Windows - x64)
-; CursorPosition = 25
-; FirstLine = 21
-; Folding = e-
-; CursorPosition = 1
-; Folding = f-
+; Folding = v-
 ; EnableThread
 ; EnableXP
 ; DPIAware
